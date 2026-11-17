@@ -8,7 +8,7 @@ param(
     [switch]$NoDesktopShortcut
 )
 
-$ErrorActionPreference = "Stop"
+$ErrorActionPreference = "Continue"
 $ProgressPreference = "SilentlyContinue"
 try {
     [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
@@ -111,7 +111,7 @@ Say "detected target version: $target"
 
 # ---- 2. Lift ARM64 ExeFS (main, sdk) to C ----
 $genDir = Join-Path $workRoot "gen"
-$jobs = [Math]::Max(1, [Environment]::ProcessorCount)
+$jobs = [Math]::Max(1, [Math]::Min([Environment]::ProcessorCount, 16))
 if (-not (Test-Path -LiteralPath (Join-Path $genDir "main\manifest.json")) -or -not (Test-Path -LiteralPath (Join-Path $genDir "sdk\manifest.json"))) {
     Say "lifting ARM64 code (main, sdk) to C..."
     New-Item -ItemType Directory -Force -Path $genDir | Out-Null
