@@ -1,0 +1,19 @@
+{
+  "id": "donkey-kong-bananza",
+  "name": "Donkey Kong Bananza",
+  "recompiler_name": "DKB Recomp (dkb-pc-recomp)",
+  "title_ids": [
+    "040074A01BF12000",
+    "040074A01BF12800"
+  ],
+  "supported_versions": [
+    0,
+    458752
+  ],
+  "default_output_subdir": "Donkey Kong Bananza",
+  "shortcut_name": "Donkey Kong Bananza",
+  "windows_entrypoint": "install.ps1",
+  "script": "install.ps1",
+  "icon": "game_icon.ico",
+  "description": "Recompile Donkey Kong Bananza (Nintendo Switch 2, 1.0.0 / 3.2.0 depuis votre .nup) en exécutable Windows PC natif (SDL3 / Vulkan, mode fenêtré par défaut, plein écran via F11, Échap pour quitter)."
+}
