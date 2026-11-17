@@ -229,6 +229,7 @@ cd /d "$Dir"
 set "TOTK_PROFILE_DIR=$globalSaveDir"
 set "TOTK_FULLSCREEN=0"
 set "TOTK_WINDOW_MODE=windowed"
+set "TOTK_WINDOW_SIZE=1280x720"
 "$dkbExe" %*
 "@ | Set-Content -Encoding ASCII $runner
 }
