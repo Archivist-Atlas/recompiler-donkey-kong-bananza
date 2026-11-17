@@ -63,6 +63,26 @@ $env:PATH = "$clang64Bin;" + $env:PATH
 $env:CLANG64_PREFIX = "C:/msys64/clang64"
 $env:PYTHONUTF8 = "1"
 $env:PYTHONUNBUFFERED = "1"
+$env:PYTHON_JIT = "0"
+
+# Pin to E-cores (logical processors 16+) on Intel 13th/14th-gen to avoid P-core boost instability during heavy Python/C codegen
+$proc = [System.Diagnostics.Process]::GetCurrentProcess()
+$origAffinity = $proc.ProcessorAffinity
+$jobs = [Math]::Max(1, [Math]::Min([Environment]::ProcessorCount, 16))
+try {
+    $cpuName = (Get-CimInstance Win32_Processor | Select-Object -First 1 -ExpandProperty Name)
+    if ($cpuName -match 'Intel.*1[34]\d{3}' -and [Environment]::ProcessorCount -gt 16) {
+        $eCoreMask = [int64]0
+        for ($c = 16; $c -lt [Math]::Min(63, [Environment]::ProcessorCount); $c++) {
+            $eCoreMask = $eCoreMask -bor ([int64]1 -shl $c)
+        }
+        if ($eCoreMask -gt 0) {
+            Say "detected ${cpuName}: pinning codegen & build to E-cores for stability"
+            $proc.ProcessorAffinity = [IntPtr]$eCoreMask
+            $jobs = [Math]::Max(1, [Math]::Min([Environment]::ProcessorCount - 16, 12))
+        }
+    }
+} catch {}
 
 # ---- Global Saves folder (<ParentDir>\Saves\<GameFolderName>) ----
 $parentInstallDir = Split-Path -Parent $Dir
@@ -111,7 +131,6 @@ Say "detected target version: $target"
 
 # ---- 2. Lift ARM64 ExeFS (main, sdk) to C ----
 $genDir = Join-Path $workRoot "gen"
-$jobs = [Math]::Max(1, [Math]::Min([Environment]::ProcessorCount, 16))
 if (-not (Test-Path -LiteralPath (Join-Path $genDir "main\manifest.json")) -or -not (Test-Path -LiteralPath (Join-Path $genDir "sdk\manifest.json"))) {
     Say "lifting ARM64 code (main, sdk) to C..."
     New-Item -ItemType Directory -Force -Path $genDir | Out-Null
