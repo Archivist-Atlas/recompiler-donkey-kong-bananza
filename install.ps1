@@ -1,4 +1,4 @@
-﻿# Donkey Kong Bananza (dkb-pc-recomp) installer for Windows (driven by NUP Studio)
+# Donkey Kong Bananza (dkb-pc-recomp) installer for Windows (driven by NUP Studio)
 param(
     [string]$Nup = "",
     [string]$Dir = "",
