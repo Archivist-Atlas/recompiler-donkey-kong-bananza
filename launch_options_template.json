@@ -54,5 +54,9 @@
     "TOTK_FULLSCREEN": "0",
     "TOTK_WINDOW_MODE": "windowed",
     "TOTK_WINDOW_SIZE": "1280x720"
-  }
+  },
+  "expected_title_ids": [
+    "040074A01BF12000",
+    "040074A01BF12800"
+  ]
 }
