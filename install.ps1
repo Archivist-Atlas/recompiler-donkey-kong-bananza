@@ -103,15 +103,34 @@ $romfsDir = Join-Path $Dir "romfs"
 New-Item -ItemType Directory -Force -Path $workRoot | Out-Null
 
 if (-not (Test-Path -LiteralPath (Join-Path $exefsDir "main")) -or -not (Test-Path -LiteralPath (Join-Path $romfsDir "romfs.bin"))) {
-    Say "extracting ExeFS and packing RomFS from .nup..."
-    $extractTmp = Join-Path $workRoot "extracted"
-    if (Test-Path -LiteralPath $extractTmp) { Remove-Item -Recurse -Force $extractTmp }
-    & $pyExe (Join-Path $source "tools\extract_nup.py") $Nup --select latest --pack --out $extractTmp
-    if ($LASTEXITCODE -ne 0) { Say "extract_nup.py failed"; exit 1 }
-    if (Test-Path -LiteralPath $exefsDir) { Remove-Item -Recurse -Force $exefsDir }
-    if (Test-Path -LiteralPath $romfsDir) { Remove-Item -Recurse -Force $romfsDir }
-    Move-Item -LiteralPath (Join-Path $extractTmp "exefs") -Destination $exefsDir -Force
-    Move-Item -LiteralPath (Join-Path $extractTmp "romfs") -Destination $romfsDir -Force
+    if (Test-Path -LiteralPath $Nup -PathType Container) {
+        $srcExefs = if (Test-Path -LiteralPath (Join-Path $Nup "exefs\main")) { Join-Path $Nup "exefs" } else { $Nup }
+        $srcRomfs = Join-Path $Nup "romfs"
+        if (-not (Test-Path -LiteralPath (Join-Path $srcExefs "main")) -or -not (Test-Path -LiteralPath $srcRomfs)) {
+            Say "error: folder must contain exefs/main and romfs/: $Nup"; exit 1
+        }
+        Say "copying ExeFS and packing RomFS from folder..."
+        if (Test-Path -LiteralPath $exefsDir) { Remove-Item -Recurse -Force $exefsDir }
+        if (Test-Path -LiteralPath $romfsDir) { Remove-Item -Recurse -Force $romfsDir }
+        Copy-Item -LiteralPath $srcExefs -Destination $exefsDir -Recurse -Force
+        if (Test-Path -LiteralPath (Join-Path $srcRomfs "romfs.bin")) {
+            Copy-Item -LiteralPath $srcRomfs -Destination $romfsDir -Recurse -Force
+        } else {
+            New-Item -ItemType Directory -Force -Path $romfsDir | Out-Null
+            & $pyExe (Join-Path $source "tools\dkb_pack_romfs.py") --dir $srcRomfs --out $romfsDir
+            if ($LASTEXITCODE -ne 0) { Say "dkb_pack_romfs.py failed"; exit 1 }
+        }
+    } else {
+        Say "extracting ExeFS and packing RomFS from .nup..."
+        $extractTmp = Join-Path $workRoot "extracted"
+        if (Test-Path -LiteralPath $extractTmp) { Remove-Item -Recurse -Force $extractTmp }
+        & $pyExe (Join-Path $source "tools\extract_nup.py") $Nup --select latest --pack --out $extractTmp
+        if ($LASTEXITCODE -ne 0) { Say "extract_nup.py failed"; exit 1 }
+        if (Test-Path -LiteralPath $exefsDir) { Remove-Item -Recurse -Force $exefsDir }
+        if (Test-Path -LiteralPath $romfsDir) { Remove-Item -Recurse -Force $romfsDir }
+        Move-Item -LiteralPath (Join-Path $extractTmp "exefs") -Destination $exefsDir -Force
+        Move-Item -LiteralPath (Join-Path $extractTmp "romfs") -Destination $romfsDir -Force
+    }
 }
 
 # Detect game version target (dkb100 vs dkb458752) from exefs/main SHA-256
