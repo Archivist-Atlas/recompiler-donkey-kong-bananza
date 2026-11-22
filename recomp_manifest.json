@@ -10,6 +10,23 @@
     0,
     458752
   ],
+  "expected_builds": [
+    {
+      "version": 0,
+      "label": "1.0.0 (base)",
+      "exefs_sha256": {
+        "main": "885b4bdd17071cc5ebbc260f6be82b3b947d12545529f0093ed13c07debcdf47",
+        "sdk": "214ebee26515c681917acccaf3eec5ca769851645c964f61f6f6fa153cf4786f"
+      }
+    },
+    {
+      "version": 458752,
+      "label": "3.2.0 (v458752)",
+      "exefs_sha256": {
+        "main": "6e8a88c70a17a1f6a005ec53d621d3c8d53dddc3a8c51f21a0caa5f4c329784e"
+      }
+    }
+  ],
   "default_output_subdir": "Donkey Kong Bananza",
   "shortcut_name": "Donkey Kong Bananza",
   "windows_entrypoint": "install.ps1",
